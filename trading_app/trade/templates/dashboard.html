@@ -1,21 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Dashboard</title>
 </head>
 <body>
     <h1>Dashboard</h1>
+    <h2>Create Account</h2>
+    <form action="{% url 'create_account' %}" method="post">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="balance">Initial Balance:</label>
+        <input type="number" id="balance" name="balance" required>
+        <button type="submit">Create Account</button>
+    </form>
+
+    <h2>Accounts</h2>
     <ul>
         {% for account in accounts %}
-            <li>{{ account.username }}: {{ account.balance }}</li>
+            <li>{{ account.username }}: ${{ account.balance }}</li>
         {% endfor %}
     </ul>
+
+    <h2>Trade</h2>
     <form action="{% url 'trade' %}" method="post">
         {% csrf_token %}
         <label for="symbol">Symbol:</label>
-        <input type="text" id="symbol" name="symbol">
+        <input type="text" id="symbol" name="symbol" required>
         <label for="qty">Quantity:</label>
-        <input type="number" id="qty" name="qty">
+        <input type="number" id="qty" name="qty" required>
         <label for="side">Side:</label>
         <select id="side" name="side">
             <option value="buy">Buy</option>
@@ -30,8 +44,8 @@
     </form>
 
     <h2>Get Crypto Data</h2>
-    <!-- <form action="{% url 'get_crypto_data' 'BTC/USDT' %}" method="get">
+    <form action="{% url 'test_crypto_data'%}" method="get">
         <button type="submit">Get BTC/USDT Data</button>
-    </form> -->
+    </form>
 </body>
 </html>
