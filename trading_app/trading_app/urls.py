@@ -25,4 +25,6 @@ urlpatterns = [
     path('create_account/', views.create_account, name='create_account'),
     path('trade/', views.trade, name='trade'),
     path('get_crypto_data/<str:symbol>/', views.get_crypto_data, name='get_crypto_data'),
+    path('test_crypto_data/<symbol>', views.test_crypto_data, name='test_crypto_data')
+    
 ]

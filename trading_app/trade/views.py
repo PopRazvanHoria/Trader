@@ -33,6 +33,6 @@ def trade(request):
         messages.success(request, 'Trade executed successfully!')
         return redirect('dashboard')
 
-def test_crypto_data(request):
+def test_crypto_data(request, symbol):
     data = data_retrieval.test_dataretrival()
-    return render(request, 'test.html')
+    return render(request, 'test.html',{'data': symbol})

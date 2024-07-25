@@ -5,5 +5,7 @@ def get_binance_data(symbol):
     data = binance.fetch_ticker(symbol)
     return data
 
-def test_dataretrival():
-    return 'pop'
+def test_dataretrival(symbol):
+    binance = ccxt.binance()
+    data = binance.fetch_ticker(symbol)
+    return data
