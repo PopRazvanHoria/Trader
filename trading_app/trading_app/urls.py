@@ -23,6 +23,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('create_account/', views.create_account, name='create_account'),
-    path('get_crypto_data/<symbol>/', views.get_crypto_data, name='get_crypto_data'),
     path('trade/', views.trade, name='trade'),
+    path('get_crypto_data/<str:symbol>/', views.get_crypto_data, name='get_crypto_data'),
 ]

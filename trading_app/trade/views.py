@@ -8,9 +8,8 @@ def index(request):
     return render(request, 'index.html')
 
 def dashboard(request):
-    return render(request, 'test.html')
-    # accounts = Account.objects.all()
-    # return render(request, 'dashboard.html', {'accounts': accounts})
+    accounts = Account.objects.all()
+    return render(request, 'dashboard.html', {'accounts': accounts})
 
 def create_account(request):
     if request.method == 'POST':
