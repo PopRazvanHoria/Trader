@@ -16,7 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from trade import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index, name='index'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('create_account/', views.create_account, name='create_account'),
+    path('get_crypto_data/<symbol>/', views.get_crypto_data, name='get_crypto_data'),
+    path('trade/', views.trade, name='trade'),
 ]
