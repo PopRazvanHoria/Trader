@@ -34,5 +34,5 @@ def trade(request):
         return redirect('dashboard')
 
 def test_crypto_data(request, symbol):
-    data = data_retrieval.test_dataretrival()
+    # data = data_retrieval.test_dataretrival(symbol)
     return render(request, 'test.html',{'data': symbol})
