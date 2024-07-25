@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Account
-import data_retrieval
-import trading_execution
+from trade.utils import data_retrieval, trading_execution, trading_strategies
+
 
 def index(request):
     return render(request, 'index.html')
 
 def dashboard(request):
-    accounts = Account.objects.all()
-    return render(request, 'dashboard.html', {'accounts': accounts})
+    return render(request, 'test.html')
+    # accounts = Account.objects.all()
+    # return render(request, 'dashboard.html', {'accounts': accounts})
 
 def create_account(request):
     if request.method == 'POST':
