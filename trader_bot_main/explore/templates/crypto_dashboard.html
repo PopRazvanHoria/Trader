@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Dashboard</title>
+</head>
+<body>
+    <h1>Live Crypto Data</h1>
+    <table id="crypto-table">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Price</th>
+                <th>Volume</th>
+                <!-- Add other headers as needed -->
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <script>
+        const tableBody = document.querySelector('#crypto-table tbody');
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/crypto-data/');
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            tableBody.innerHTML = '';
+            data.forEach(coin => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${coin.symbol}</td>
+                    <td>${coin.price}</td>
+                    <td>${coin.volume}</td>
+                    <!-- Add other data as needed -->
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+
+        socket.onclose = function(e) {
+            console.error('WebSocket closed unexpectedly');
+        };
+    </script>
+</body>
+</html>
