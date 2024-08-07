@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trader Bot</title>
+</head>
+<body>
+    <h1>Trade List</h1>
+    <ul>
+    {% for trade in trades %}
+        <li>{{ trade.symbol }}: {{ trade.amount }} @ {{ trade.price }} ({{ trade.timestamp }})</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
