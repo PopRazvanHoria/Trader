@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-4*cs_8m*a-1((*d_sfr7qz%=evevh&ka613%qmavad4i3j6@7x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -40,8 +40,11 @@ INSTALLED_APPS = [
     'main',
     'market',
     'channels',
-
 ]
+
+
+# Set the ASGI application for Django Channels
+ASGI_APPLICATION = 'trader_bot_main.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -125,9 +128,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Set the ASGI application for Django Channels
-ASGI_APPLICATION = 'trader_bot_main.asgi.application'
 
 # LOGGING = {
 #     'version': 1,
