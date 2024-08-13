@@ -20,8 +20,9 @@ class CryptoDataConsumer(AsyncWebsocketConsumer):
         uri = "wss://ws-api.livecoinwatch.com/socket.io/?EIO=3&transport=websocket"
         try:
             async with websockets.connect(uri) as websocket:
-                logger.info("Connected to WebSocket.")
-                await websocket.send('420["subscribe",{"frequency":2000,"currency":"USD","stats":true,"coins":{"offset":0,"limit":50,"sort":"rank","order":"ascending","fields":"orderTotal,extremes.all.max.usd,delta.hour,plot.week,cap,volume,delta.day","category":null,"exchanges":null,"platforms":[],"filters":{}},"spotlight":"overview,recent,trending,upvotes","deltas":""}]')
+                logger.info("Connected to WebSocket.")                
+                # await self.send("TEDS1")
+                await websocket.send('420["subscribe",{"frequency":2200,"currency":"USD","stats":true,"coins":{"offset":0,"limit":50,"sort":"rank","order":"ascending","fields":"orderTotal,extremes.all.max.usd,delta.hour,plot.week,cap,volume,delta.day","category":null,"exchanges":null,"platforms":[],"filters":{}},"spotlight":"overview,recent,trending,upvotes","deltas":""}]')
                 logger.info("Subscription message sent.")
                 while True:
                     response = await websocket.recv()
@@ -32,6 +33,5 @@ class CryptoDataConsumer(AsyncWebsocketConsumer):
 
                     # Send "2" to keep connection alive
                     await websocket.send("2")
-                    await asyncio.sleep(3)
         except Exception as e:
             logger.error(f"WebSocket error: {e}")

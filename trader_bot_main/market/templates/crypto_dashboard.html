@@ -20,25 +20,25 @@
     <script>
         const tableBody = document.querySelector('#crypto-table tbody');
         const socket = new WebSocket('ws://' + window.location.host + '/ws/crypto-data/');
-
+        console.log('We here.');
         socket.onopen = function(e) {
             console.log('WebSocket connection opened.');
         };
 
         socket.onmessage = function(e) {
             console.log('Message received from server:', e.data);
-            const data = JSON.parse(e.data);
-            tableBody.innerHTML = '';
-            data.forEach(coin => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${coin.symbol}</td>
-                    <td>${coin.price}</td>
-                    <td>${coin.volume}</td>
-                    <!-- Add other data as needed -->
-                `;
-                tableBody.appendChild(row);
-            });
+            // const data = JSON.parse(e.data);
+            // tableBody.innerHTML = '';
+            // data.forEach(coin => {
+            //
+            // });     const row = document.createElement('tr');
+            //     row.innerHTML = `
+            //         <td>${coin.symbol}</td>
+            //         <td>${coin.price}</td>
+            //         <td>${coin.volume}</td>
+            //         <!-- Add other data as needed -->
+            //     `;
+            //     tableBody.appendChild(row);
         };
 
         socket.onclose = function(e) {
