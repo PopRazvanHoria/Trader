@@ -74,9 +74,9 @@
 
         socket.onmessage = function(event) {
             const message = JSON.parse(event.data);
-            const ordered = message.sort((a, b) => (a.v > b.v ? 1 : -1));
+            const ordered = message.sort((a, b) => (a.s > b.s ? 1 : -1));
             const suffixFilter = ordered.filter(item => item.s.toLowerCase().endsWith('usdt'));
-            const prefixes = ["BTC", "ETH", "SOL", "XRP", "DOGE", "TON", "TRX", "ADA", "BNB", "USDC"];
+            const prefixes = ["BTC", "ETHU", "SOL", "XRP", "DOGE", "TON", "TRX", "ADA", "BNB", "USDC"];
             const prefixFilter = suffixFilter.filter(item => prefixes.some(prefix => item.s.startsWith(prefix)));
 
             prefixFilter.forEach(data => {
