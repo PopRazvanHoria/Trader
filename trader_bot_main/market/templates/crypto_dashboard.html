@@ -1,53 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Dashboard</title>
 </head>
 <body>
     <h1>Live Crypto Data</h1>
+
     <table id="crypto-table">
         <thead>
             <tr>
                 <th>Symbol</th>
                 <th>Price</th>
                 <th>Volume</th>
+                <th>Price Change</th>
                 <!-- Add other headers as needed -->
             </tr>
         </thead>
         <tbody>
         </tbody>
     </table>
+
     <script>
-        const tableBody = document.querySelector('#crypto-table tbody');
-        const socket = new WebSocket('ws://' + window.location.host + '/ws/crypto-data/');
-        console.log('We here.');
-        socket.onopen = function(e) {
-            console.log('WebSocket connection opened.');
+        const localStorageKey = 'cryptoData';
+        let localData = {}; // Store data from JSON and WebSocket
+
+        // Load JSON from localStorage when the page loads
+        function loadJSONFromLocalStorage() {
+            const storedData = localStorage.getItem(localStorageKey);
+            if (storedData) {
+                localData = JSON.parse(storedData);
+                updateTableWithLoadedData();
+            }
+        }
+
+        // Save JSON data to localStorage
+        function saveJSONToLocalStorage() {
+            localStorage.setItem(localStorageKey, JSON.stringify(localData));
+        }
+
+        // Update the table with the loaded data
+        function updateTableWithLoadedData() {
+            const tbody = document.querySelector('#crypto-table tbody');
+            tbody.innerHTML = ''; // Clear existing table rows
+
+            for (const symbol in localData) {
+                const data = localData[symbol];
+                const row = createTableRow(data);
+                row.setAttribute('data-symbol', symbol);
+                tbody.appendChild(row);
+            }
+        }
+
+        // Create a table row for given data
+        function createTableRow(data) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${data.s}</td>
+                <td>${data.c}</td>
+                <td>${data.v}</td>
+                <td>${data.P}</td>
+            `;
+            return row;
+        }
+
+        // Open WebSocket connection and handle incoming messages
+        const socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+        
+        socket.onopen = function(event) {
+            console.log("Connected to Binance WebSocket!");
         };
 
-        socket.onmessage = function(e) {
-            console.log('Message received from server:', e.data);
-            // const data = JSON.parse(e.data);
-            // tableBody.innerHTML = '';
-            // data.forEach(coin => {
-            //
-            // });     const row = document.createElement('tr');
-            //     row.innerHTML = `
-            //         <td>${coin.symbol}</td>
-            //         <td>${coin.price}</td>
-            //         <td>${coin.volume}</td>
-            //         <!-- Add other data as needed -->
-            //     `;
-            //     tableBody.appendChild(row);
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            const ordered = message.sort((a, b) => (a.v > b.v ? 1 : -1));
+            const suffixFilter = ordered.filter(item => item.s.toLowerCase().endsWith('usdt'));
+            const prefixes = ["BTC", "ETH", "SOL", "XRP", "DOGE", "TON", "TRX", "ADA", "BNB", "USDC"];
+            const prefixFilter = suffixFilter.filter(item => prefixes.some(prefix => item.s.startsWith(prefix)));
+
+            prefixFilter.forEach(data => {
+                localData[data.s] = data; // Update or add new data to localData
+                updateTableRow(data); // Update or add new data to the table
+            });
+
+            // Save the updated data to localStorage after each WebSocket message
+            saveJSONToLocalStorage();
         };
 
-        socket.onclose = function(e) {
-            console.error('WebSocket closed unexpectedly');
+        socket.onerror = function(error) {
+            console.error("WebSocket Error: ", error);
         };
 
-        socket.onerror = function(e) {
-            console.error('WebSocket error:', e);
+        socket.onclose = function(event) {
+            console.log("Disconnected from Binance WebSocket.");
         };
+
+        // Update the table row for the given data
+        function updateTableRow(data) {
+            let row = document.querySelector(`#crypto-table tbody tr[data-symbol="${data.s}"]`);
+            if (!row) {
+                row = createTableRow(data);
+                row.setAttribute('data-symbol', data.s);
+                document.querySelector('#crypto-table tbody').appendChild(row);
+            } else {
+                row.children[1].textContent = data.c;
+                row.children[2].textContent = data.v;
+                row.children[3].textContent = data.P;
+            }
+        }
+
+        // Load data from localStorage when the page loads
+        window.onload = loadJSONFromLocalStorage;
+
     </script>
 </body>
 </html>
