@@ -1,4 +1,5 @@
 from django.db import models
+from .coins import COINS
 
 class Coin(models.Model):
     symbol = models.CharField(max_length=10)
@@ -7,6 +8,14 @@ class Coin(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @classmethod
+
+    def initialize_coins(cls):
+
+        for coin in COINS:
+
+            cls.objects.get_or_create(symbol=coin["symbol"], defaults={"name": coin["name"]})
 
 class Strategy(models.Model):
     STRATEGY_CHOICES = [
@@ -14,7 +23,7 @@ class Strategy(models.Model):
         ('golden_cross', 'Golden Cross/Death Cross'),
     ]
     name = models.CharField(max_length=50, choices=STRATEGY_CHOICES)
-    coins = models.ManyToManyField(Coin)
+    coin = models.ManyToManyField(Coin)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     params = models.JSONField(default=dict)  # Strategy-specific settings
