@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Trading</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Add some basic styling */
+        form {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Crypto Trading Analysis</h1>
     
-    <form id="crypto-form">
+    <form id="crypto-form" method="get" action="{% url 'plot_graph' symbol='BTC' %}">
         <label for="symbol">Select Cryptocurrency:</label>
-        <select id="symbol" name="symbol">
+        <select id="symbol" name="symbol" onchange="updateFormAction()">
             <option value="BTC">BTC</option>
             <option value="ETH">ETH</option>
             <option value="SOL">SOL</option>
@@ -24,59 +29,77 @@
             <option value="USDC">USDC</option>
         </select>
         
-        <label for="interval">Select Interval:</label>
-        <select id="interval" name="interval">
-            <option value="1d">1 Day</option>
-            <option value="1h">1 Hour</option>
-            <!-- Add more intervals if needed -->
-        </select>
+        <label for="amount">Amount:</label>
+        <input type="text" id="amount" name="amount" value="0"><br><br>
 
-        <label for="ema">Add EMA:</label>
-        <input type="text" id="ema" name="ema" placeholder="e.g., 20">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}" required><br><br>
+
+        <label for="start_time">Start Time:</label>
+        <input type="time" id="start_time" name="start_time" value="{{ start_time }}" required><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}" required><br><br>
+
+        <label for="end_time">End Time:</label>
+        <input type="time" id="end_time" name="end_time" value="{{ end_time }}" required><br><br>
+
+        <label for="ema">Add EMA (comma-separated):</label>
+        <input type="text" id="ema" name="ema" placeholder="e.g., 20,50" value="{{ ema }}">
         
-        <label for="ma">Add MA:</label>
-        <input type="text" id="ma" name="ma" placeholder="e.g., 50">
-        
-        <button type="button" id="update-graph">Update Graph</button>
+        <label for="ma">Add MA (comma-separated):</label>
+        <input type="text" id="ma" name="ma" placeholder="e.g., 50,100" value="{{ ma }}"><br><br>
+
+        <button type="submit">Update Graph</button>
+        <button type="button" onclick="clearIndicators()">Clear Indicators</button>
     </form>
 
     <div id="graph-container">
-        <img id="graph-image" src="" alt="Graph will appear here">
+        {% if graph_url %}
+            <img id="graph-image" src="{{ graph_url }}" alt="Graph">
+        {% else %}
+            <p>No graph available</p>
+        {% endif %}
     </div>
-
+    
     <script>
-        function updateGraph() {
-            const symbol = $('#symbol').val();
-            const interval = $('#interval').val();
-            const ema = $('#ema').val();
-            const ma = $('#ma').val();
-            
-            let url = `/plot/${symbol}/?interval=${interval}`;
-            
+        document.getElementById('symbol').addEventListener('change', updateFormAction);
+
+        function setSelectedSymbol() {
+            const params = new URLSearchParams(window.location.search);
+            const symbol = params.get('symbol');
+            const ema = params.get('ema');
+            const ma = params.get('ma');
+            if (symbol) {
+                document.getElementById('symbol').value = symbol;
+            }
             if (ema) {
-                url += `&ema=${ema}`;
+                document.getElementById('ema').value = ema;
             }
             if (ma) {
-                url += `&ma=${ma}`;
+                document.getElementById('ma').value = ma;
             }
-
-            $.ajax({
-                url: url,
-                method: 'GET',
-                success: function(response) {
-                    $('#graph-image').attr('src', response.graph_url);
-                }
-            });
         }
 
-        $('#update-graph').on('click', function() {
-            updateGraph();
-        });
+        function updateFormAction() {
+            const form = document.getElementById('crypto-form');
+            const symbol = document.getElementById('symbol').value;
+            form.action = `/plot/${symbol}/`;  // Update form action based on selected symbol
 
-        // Initial graph load
-        $(document).ready(function() {
-            updateGraph();
-        });
+            // Set query parameters
+            const params = new URLSearchParams(new FormData(form));
+            params.set('symbol', symbol);
+
+            form.submit();
+        }
+
+        function clearIndicators() {
+            document.getElementById('ema').value = '';
+            document.getElementById('ma').value = '';
+            updateFormAction();
+        }
+
+        setSelectedSymbol();
     </script>
 </body>
 </html>
