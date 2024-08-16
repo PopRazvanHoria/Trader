@@ -1,0 +1,71 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ name }} - Details</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.7.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <header>
+        <img src="{% static 'images/' %}{{ image }}" alt="{{ name }} Logo" style="width: 30px; height: 30px;"/>
+        <h1>{{ name }}</h1>
+        <p>{{ description }}</p>
+    </header>
+
+    <section id="price-history">
+        <h2>Price History</h2>
+        <div id="chart-container" style="width: 600px; height: 300px;"></div>
+        <label for="timeframe">Select Time Frame:</label>
+        <select id="timeframe">
+            <option value="1m">1 Minute</option>
+            <option value="5m">5 Minutes</option>
+            <option value="15m">15 Minutes</option>
+            <option value="1h">1 Hour</option>
+            <option value="4h">4 Hours</option>
+            <option value="1d">1 Day</option>
+        </select>
+    </section>
+
+    <script>
+        const symbol = "{{ symbol }}";
+        const timeframeElement = document.getElementById('timeframe');
+        const chartContainer = document.getElementById('chart-container');
+
+        // Create the chart and series outside the fetch function
+        const chart = LightweightCharts.createChart(chartContainer, { width: 600, height: 300 });
+        const candleSeries = chart.addCandlestickSeries();
+
+        // Fetch and render historical data
+        function fetchHistoricalData(timeframe) {
+            const endpoint = `https://api.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=${timeframe}`;
+            
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                    const processedData = data.map(item => ({
+                        time: item[0] / 1000,
+                        open: parseFloat(item[1]),
+                        high: parseFloat(item[2]),
+                        low: parseFloat(item[3]),
+                        close: parseFloat(item[4])
+                    }));
+
+                    // Update the existing chart with new data
+                    candleSeries.setData(processedData);
+                });
+        }
+
+        // Listen for changes to the timeframe dropdown
+        timeframeElement.addEventListener('change', function() {
+            fetchHistoricalData(timeframeElement.value);
+        });
+
+        // Initial load with the default timeframe
+        fetchHistoricalData('1m');
+    </script>
+</body>
+</html>
