@@ -22,6 +22,7 @@ urlpatterns = [
     path('', include('main.urls')),
     path('', include('market.urls')),
     path('', include('strategy.urls')),
+    path('trading/', include('test_trading.urls')),
     path('coins/', include('coins.urls')),
     
 ]

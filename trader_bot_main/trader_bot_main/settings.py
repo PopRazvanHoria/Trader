@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'strategy',
     'market',
     'channels',
+    'test_trading',
+    'rest_framework',
 ]
 
 
