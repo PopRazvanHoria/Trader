@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Crypto Trading Analysis</h1>
+    
+    <form id="crypto-form">
+        <label for="symbol">Select Cryptocurrency:</label>
+        <select id="symbol" name="symbol">
+            <option value="BTC">BTC</option>
+            <option value="ETH">ETH</option>
+            <option value="SOL">SOL</option>
+            <option value="XRP">XRP</option>
+            <option value="DOGE">DOGE</option>
+            <option value="TON">TON</option>
+            <option value="TRX">TRX</option>
+            <option value="ADA">ADA</option>
+            <option value="BNB">BNB</option>
+            <option value="USDC">USDC</option>
+        </select>
+        
+        <label for="interval">Select Interval:</label>
+        <select id="interval" name="interval">
+            <option value="1d">1 Day</option>
+            <option value="1h">1 Hour</option>
+            <!-- Add more intervals if needed -->
+        </select>
+
+        <label for="ema">Add EMA:</label>
+        <input type="text" id="ema" name="ema" placeholder="e.g., 20">
+        
+        <label for="ma">Add MA:</label>
+        <input type="text" id="ma" name="ma" placeholder="e.g., 50">
+        
+        <button type="button" id="update-graph">Update Graph</button>
+    </form>
+
+    <div id="graph-container">
+        <img id="graph-image" src="" alt="Graph will appear here">
+    </div>
+
+    <script>
+        function updateGraph() {
+            const symbol = $('#symbol').val();
+            const interval = $('#interval').val();
+            const ema = $('#ema').val();
+            const ma = $('#ma').val();
+            
+            let url = `/plot/${symbol}/?interval=${interval}`;
+            
+            if (ema) {
+                url += `&ema=${ema}`;
+            }
+            if (ma) {
+                url += `&ma=${ma}`;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(response) {
+                    $('#graph-image').attr('src', response.graph_url);
+                }
+            });
+        }
+
+        $('#update-graph').on('click', function() {
+            updateGraph();
+        });
+
+        // Initial graph load
+        $(document).ready(function() {
+            updateGraph();
+        });
+    </script>
+</body>
+</html>
