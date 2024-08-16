@@ -4,7 +4,7 @@ from .coins import COINS
 class Coin(models.Model):
     symbol = models.CharField(max_length=10)
     name = models.CharField(max_length=50)
-    amount = models.DecimalField(max_digits=20, decimal_places=8)
+    amount = models.DecimalField(max_digits=20, decimal_places=8, default=0.0)
 
     def __str__(self):
         return self.name
@@ -23,7 +23,7 @@ class Strategy(models.Model):
         ('golden_cross', 'Golden Cross/Death Cross'),
     ]
     name = models.CharField(max_length=50, choices=STRATEGY_CHOICES)
-    coin = models.ManyToManyField(Coin)
+    coins = models.ManyToManyField(Coin)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     params = models.JSONField(default=dict)  # Strategy-specific settings
