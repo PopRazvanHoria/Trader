@@ -1,6 +1,8 @@
 from datetime import datetime
 from .models import Strategy, Coin
 import requests
+import numpy as np
+
 
 BINANCE_API_URL = "https://api.binance.com/api/v3/klines"
 
@@ -43,11 +45,17 @@ def hold_strategy(strategy):
     return results
 
 def calculate_moving_average(data, period):
-    """Helper function to calculate moving averages."""
-    ma_values = []
-    for i in range(period - 1, len(data)):
-        ma_values.append(sum(item['close'] for item in data[i - period + 1:i + 1]) / period)
-    return ma_values
+    prices = [item['close'] for item in data]
+    ma_values = np.convolve(prices, np.ones(period)/period, mode='valid')
+    return ma_values.tolist()
+
+def calculate_ema(data, period):
+    prices = [item['close'] for item in data]
+    ema_values = [sum(prices[:period]) / period]
+    multiplier = 2 / (period + 1)
+    for price in prices[period:]:
+        ema_values.append((price - ema_values[-1]) * multiplier + ema_values[-1])
+    return ema_values
 
 def golden_cross_strategy(strategy):
     results = {}

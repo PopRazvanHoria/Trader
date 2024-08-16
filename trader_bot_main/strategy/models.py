@@ -23,7 +23,7 @@ class Strategy(models.Model):
         ('golden_cross', 'Golden Cross/Death Cross'),
     ]
     name = models.CharField(max_length=50, choices=STRATEGY_CHOICES)
-    coins = models.ManyToManyField(Coin)
+    coin = models.ForeignKey(Coin, on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     params = models.JSONField(default=dict)  # Strategy-specific settings

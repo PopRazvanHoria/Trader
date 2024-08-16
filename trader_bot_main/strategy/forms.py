@@ -3,15 +3,9 @@ from .models import Strategy, Coin, Indicator
 from .coins import get_coin_choices
 
 class StrategyForm(forms.ModelForm):
-    coins = forms.ModelMultipleChoiceField(
-        queryset=Coin.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        label="Select Coins"
-    )
-
     class Meta:
         model = Strategy
-        fields = ['name', 'start_time', 'end_time', 'coins']
+        fields = ['name', 'start_time', 'end_time', 'coin']
 
 class CoinForm(forms.ModelForm):
     class Meta:
