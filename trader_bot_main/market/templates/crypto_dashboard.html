@@ -4,29 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Dashboard</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1c1f26, #313640);
+            margin: 0;
+            padding: 20px;
+            color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #4AD9A3;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            background: #4AD9A3;
+            color: #1c1f26;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #3ec488;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #2c2f36;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1c1f26;
+            color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #313640;
+            color: #f0f0f0;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #3a3f48;
+        }
+
+        tr:hover td {
+            background-color: #3ec488;
+        }
+    </style>
 </head>
 <body>
-    <h1>Live Crypto Data</h1>
-
-    <table id="crypto-table">
-        <thead>
-            <tr>
-                <th>Symbol</th>
-                <th>Price</th>
-                <th>Volume</th>
-                <th>Price Change</th>
-                <!-- Add other headers as needed -->
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="container">
+        <h1>Live Crypto Data</h1>
+        <a class="back-link" href="http://127.0.0.1:8000/">← Back to Home</a>
+        <table id="crypto-table">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Price</th>
+                    <th>Volume</th>
+                    <th>Price Change</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 
     <script>
         const localStorageKey = 'cryptoData';
-        let localData = {}; // Store data from JSON and WebSocket
+        let localData = {};
 
-        // Load JSON from localStorage when the page loads
         function loadJSONFromLocalStorage() {
             const storedData = localStorage.getItem(localStorageKey);
             if (storedData) {
@@ -35,15 +106,13 @@
             }
         }
 
-        // Save JSON data to localStorage
         function saveJSONToLocalStorage() {
             localStorage.setItem(localStorageKey, JSON.stringify(localData));
         }
 
-        // Update the table with the loaded data
         function updateTableWithLoadedData() {
             const tbody = document.querySelector('#crypto-table tbody');
-            tbody.innerHTML = ''; // Clear existing table rows
+            tbody.innerHTML = '';
 
             for (const symbol in localData) {
                 const data = localData[symbol];
@@ -51,9 +120,16 @@
                 row.setAttribute('data-symbol', symbol);
                 tbody.appendChild(row);
             }
+
+            // Add click event listener to each row after it is appended
+            document.querySelectorAll('#crypto-table tbody tr').forEach(row => {
+                row.addEventListener('click', function() {
+                    const symbol = row.getAttribute('data-symbol').slice(0, -4); // Remove the 'USDT' part
+                    window.location.href = `http://127.0.0.1:8000/coins/${symbol}/`;
+                });
+            });
         }
 
-        // Create a table row for given data
         function createTableRow(data) {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -65,7 +141,6 @@
             return row;
         }
 
-        // Open WebSocket connection and handle incoming messages
         const socket = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
         
         socket.onopen = function(event) {
@@ -80,11 +155,10 @@
             const prefixFilter = suffixFilter.filter(item => prefixes.some(prefix => item.s.startsWith(prefix)));
 
             prefixFilter.forEach(data => {
-                localData[data.s] = data; // Update or add new data to localData
-                updateTableRow(data); // Update or add new data to the table
+                localData[data.s] = data;
+                updateTableRow(data);
             });
 
-            // Save the updated data to localStorage after each WebSocket message
             saveJSONToLocalStorage();
         };
 
@@ -96,7 +170,6 @@
             console.log("Disconnected from Binance WebSocket.");
         };
 
-        // Update the table row for the given data
         function updateTableRow(data) {
             let row = document.querySelector(`#crypto-table tbody tr[data-symbol="${data.s}"]`);
             if (!row) {
@@ -110,9 +183,7 @@
             }
         }
 
-        // Load data from localStorage when the page loads
         window.onload = loadJSONFromLocalStorage;
-
     </script>
 </body>
 </html>

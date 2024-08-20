@@ -8,17 +8,106 @@
     <title>{{ name }} - Details</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.7.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1c1f26, #313640);
+            margin: 0;
+            padding: 20px;
+            color: #f0f0f0;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        header img {
+            margin-right: 15px;
+            width: 80px;
+            height: 80px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #4AD9A3;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #c7c7c7;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #4AD9A3;
+        }
+
+        #chart-container {
+            margin-bottom: 20px;
+            background: #2c2f36;
+            border-radius: 10px;
+            padding: 10px;
+            width: 80%; /* Smaller width */
+            max-width: 600px; /* Maximum width */
+            margin: 0 auto; /* Center the chart */
+        }
+
+        label {
+            font-weight: bold;
+            color: #f0f0f0;
+            display: block;
+            text-align: center; /* Center the label */
+            margin-top: 10px;
+        }
+
+        select {
+            margin-left: 10px;
+            padding: 5px;
+            background-color: #4AD9A3;
+            border: none;
+            border-radius: 5px;
+            color: #1c1f26;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background: #4AD9A3;
+            color: #1c1f26;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            text-align: center; /* Center the text */
+            margin-left: auto; 
+            margin-right: auto;
+            display: block;
+            width: fit-content;
+        }
+
+        .back-link:hover {
+            background: #3ec488;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <img src="{% static 'images/' %}{{ image }}" alt="{{ name }} Logo" style="width: 30px; height: 30px;"/>
-        <h1>{{ name }}</h1>
-        <p>{{ description }}</p>
+        <img src="{% static 'images/' %}{{ image }}" alt="{{ name }} Logo">
+        <div>
+            <h1>{{ name }}</h1>
+            <p>{{ description }}</p>
+        </div>
     </header>
 
     <section id="price-history">
         <h2>Price History</h2>
-        <div id="chart-container" style="width: 600px; height: 300px;"></div>
+        <div id="chart-container"></div>
         <label for="timeframe">Select Time Frame:</label>
         <select id="timeframe">
             <option value="1m">1 Minute</option>
@@ -30,13 +119,15 @@
         </select>
     </section>
 
+    <a class="back-link" href="http://127.0.0.1:8000/dashboard/">← Back to Dashboard</a>
+
     <script>
         const symbol = "{{ symbol }}";
         const timeframeElement = document.getElementById('timeframe');
         const chartContainer = document.getElementById('chart-container');
 
-        // Create the chart and series outside the fetch function
-        const chart = LightweightCharts.createChart(chartContainer, { width: 600, height: 300 });
+        // Create the chart with a smaller size
+        const chart = LightweightCharts.createChart(chartContainer, { width: chartContainer.clientWidth, height: 300 });
         const candleSeries = chart.addCandlestickSeries();
 
         // Fetch and render historical data
@@ -54,7 +145,6 @@
                         close: parseFloat(item[4])
                     }));
 
-                    // Update the existing chart with new data
                     candleSeries.setData(processedData);
                 });
         }
