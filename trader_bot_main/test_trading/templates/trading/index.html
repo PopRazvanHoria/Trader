@@ -190,17 +190,15 @@
                     <option value="USDC">USDC</option>
                 </select>
                 
-                <label for="amount">Amount:</label>
-                <input type="text" id="amount" name="amount" value="0">
+                <label for="amount">Amount in USDS:</label>
+                <input type="text" id="amount" name="amount" value="{{ amount }}">
                 
                 <!-- Strategy Selection -->
                 <label for="strategy">Select Strategy:</label>
                 <select id="strategy" name="strategy" onchange="toggleWindowSettings()">
                     <option value="hold">Hold</option>
                     <option value="golden_cross">Golden Cross/Death Cross</option>
-                    <option value="ml_recursive">ML Recursive Strategy</option>
-                    <option value="ml_alternative">Alternative ML Strategy</option>
-                    <option value="nlp_sentiment">NLP Sentiment Analysis</option>
+                    <option value="lstm">ML Recursive Strategy</option>
                 </select>
                 
                 <!-- Short and Long Window settings (hidden by default) -->

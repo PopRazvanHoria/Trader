@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'coins',
-    # 'strategy',
     'market',
     'channels',
     'test_trading',

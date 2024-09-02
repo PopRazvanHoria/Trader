@@ -21,7 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
     path('', include('market.urls')),
-    # path('', include('strategy.urls')),
     path('', include('test_trading.urls')),
     path('coins/', include('coins.urls')),
     

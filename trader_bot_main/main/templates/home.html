@@ -47,7 +47,7 @@
 
         .links {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
@@ -78,6 +78,10 @@
         .footer-link:hover {
             color: #f0f0f0;
         }
+
+        .footer{
+            margin-top: auto;
+        }
     </style>
 </head>
 <body>
@@ -97,7 +101,9 @@
             <a class="link-item" href="http://127.0.0.1:8000/coins/USDC/">USDC</a>
         </div>
         <a class="dashboard-link" href="http://127.0.0.1:8000/process/">Crypto Trading Analysis</a>
-        <a class="footer-link" href="https://github.com/your-repo" target="_blank">Visit our GitHub</a>
+        <div class="footer">
+            <a class="footer-link" href="https://github.com/your-repo" target="_blank">Visit our GitHub</a>
+        </div>
     </div>
 </body>
 </html>

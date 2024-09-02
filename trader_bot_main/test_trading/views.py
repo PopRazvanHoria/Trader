@@ -3,14 +3,19 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 import pandas as pd
+
 from django.shortcuts import render
 import matplotlib.pyplot as plt
 import io
-from io import BytesIO
 import base64
 from django.http import HttpResponse
 import matplotlib
 from datetime import datetime, timedelta
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential, load_model
+import os
+from keras.layers import Dense, LSTM
+import numpy as np
 
 matplotlib.use('Agg')
 
@@ -137,11 +142,8 @@ def plot_graph(request, symbol):
         plt.title(f'{symbol} Hold Strategy\nProfit: {profit_percentage:.2f}% Final Value: {final_value:.2f}')
 
     elif strategy == 'golden_cross':
-        short_ema = df['close'].ewm(span=short_window, adjust=False).mean()
-        long_ema = df['close'].ewm(span=long_window, adjust=False).mean()
-
-        df['short_ema'] = short_ema
-        df['long_ema'] = long_ema
+        df['short_ema'] = df['close'].ewm(span=short_window, adjust=False).mean()
+        df['long_ema'] = df['close'].ewm(span=long_window, adjust=False).mean()
        
         df['crossover'] = (df['short_ema'] >  df['long_ema']) & (df['short_ema'].shift(1) <=  df['long_ema'].shift(1))
         df['crossunder'] = (df['short_ema'] <  df['long_ema']) & (df['short_ema'].shift(1) >=  df['long_ema'].shift(1))
@@ -150,11 +152,9 @@ def plot_graph(request, symbol):
         df['crossunder'] = df['crossunder'].map(lambda x : -int(x))
         df['strategy'] = df['crossover'] + df['crossunder']
 
-
         capital = amount
         coins = 0
         trade_log = []
-
         
         for index, row in df.iterrows():
             if index < long_window :
@@ -171,9 +171,10 @@ def plot_graph(request, symbol):
                 capital = coins * sell_price
                 coins = 0 
 
-        plt.plot(df['timestamp'], short_ema, label=f'{short_window}-Day EMA')
-        plt.plot(df['timestamp'], long_ema, label=f'{long_window}-Day EMA')
+        plt.plot(df['timestamp'], df['short_ema'], label=f'{short_window}-Day EMA')
+        plt.plot(df['timestamp'], df['long_ema'], label=f'{long_window}-Day EMA')
 
+        print(trade_log)
         for trade in trade_log:
 
             if trade['action'] == 'buy':
@@ -185,6 +186,85 @@ def plot_graph(request, symbol):
         profit_percentage = ((final_value - amount) / amount) * 100
 
         plt.title(f'{symbol} Golden Cross/Death Cross Strategy\nProfit: {profit_percentage:.2f}% Final Value: {final_value:.2f}')
+
+    elif strategy == 'lstm':
+        # Prepare data for LSTM
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        df['scaled_close'] = scaler.fit_transform(df['close'].values.reshape(-1, 1))
+
+        # Prepare the training data
+        look_back = 60
+        x_train, y_train = [], []
+        for i in range(look_back, len(df)):
+            x_train.append(df['scaled_close'].iloc[i-look_back:i].values)
+            y_train.append(df['scaled_close'].iloc[i])
+
+        x_train, y_train = np.array(x_train), np.array(y_train)
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+
+        # Filepath to save/load model
+        model_path = f'{symbol}_lstm_model.h5'
+        # Load existing model if available
+        if os.path.exists(model_path):
+            model = load_model(model_path)
+            print(f"Loaded existing model from {model_path}")
+        else:
+            # Build and train a new LSTM model
+            model = Sequential()
+            model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+            model.add(LSTM(units=50))
+            model.add(Dense(1))
+
+            model.compile(optimizer='adam', loss='mean_squared_error')
+            model.fit(x_train, y_train, epochs=1, batch_size=1, verbose=2)
+            
+            # Save the model
+            model.save(model_path)
+            print(f"Saved new model to {model_path}")
+
+        # Predicting future prices
+        predictions = []
+        for i in range(look_back, len(df)):
+            input_data = df['scaled_close'].iloc[i-look_back:i].values
+            input_data = np.reshape(input_data, (1, look_back, 1))
+            predicted_price = model.predict(input_data)
+            predictions.append(scaler.inverse_transform(predicted_price)[0][0])
+        df = df.iloc[look_back:]
+        df['predicted_close'] = predictions
+
+        # Simulate trading
+        capital = amount
+        coins = 0
+        trade_log = []
+
+        for index, row in df.iterrows():
+            if index == len(df) - 1:
+                break  # Skip last row
+            if row['predicted_close'] > row['close']:
+                if coins == 0:
+                    coins = capital / row['close']
+                    capital = 0
+                    trade_log.append({'action': 'buy', 'price': row['close'], 'timestamp': row['timestamp'], 'index': index})
+            elif row['predicted_close'] < row['close']:
+                if coins != 0:
+                    capital = coins * row['close']
+                    coins = 0
+                    trade_log.append({'action': 'sell', 'price': row['close'], 'timestamp': row['timestamp'], 'index': index})
+
+        # Final capital calculation
+        final_value = capital + coins * df['close'].iloc[-1]
+        profit_percentage = ((final_value - amount) / amount) * 100
+
+        # Plot buy/sell points
+        for trade in trade_log:
+            if trade['action'] == 'buy':
+                plt.scatter(trade['timestamp'], trade['price'], marker='^', color='green', s=100, zorder=10)
+            elif trade['action'] == 'sell':
+                plt.scatter(trade['timestamp'], trade['price'], marker='v', color='red', s=100, zorder=10)
+
+
+        
+        plt.title(f'{symbol} LSTM Strategy\nProfit: {profit_percentage:.2f}% Final Value: {final_value:.2f}')
 
 
     # EMA and MA plotting
@@ -228,7 +308,7 @@ def plot_graph(request, symbol):
 
 def process_form(request):
     symbol = request.GET.get('symbol', 'BTC')
-    amount = request.GET.get('amount', '0')
+    amount = request.GET.get('amount', '100')
 
     # Calculate default dates and times
     end_datetime = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
