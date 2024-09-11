@@ -19,29 +19,6 @@ import numpy as np
 
 matplotlib.use('Agg')
 
-@api_view(['GET'])
-def fetch_crypto_data(request, symbol):
-    interval = request.GET.get('interval', '1d')  # default to 1 day
-    url = 'https://api.binance.com/api/v3/klines'
-    params = {
-        'symbol': symbol + 'USDT',  # assuming USDT for simplicity
-        'interval': interval,
-        'limit': 1000
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-
-    # Convert to DataFrame for easier manipulation
-    df = pd.DataFrame(data, columns=[
-        'timestamp', 'open', 'high', 'low', 'close', 'volume', 
-        'close_time', 'quote_asset_volume', 'number_of_trades', 
-        'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
-    ])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
- 
-    return JsonResponse(df.to_dict(orient='index'))
-
 def index(request):
     return render(request, 'trading/index.html')
 
@@ -193,7 +170,7 @@ def plot_graph(request, symbol):
         df['scaled_close'] = scaler.fit_transform(df['close'].values.reshape(-1, 1))
 
         # Prepare the training data
-        look_back = 60
+        look_back = 100
         x_train, y_train = [], []
         for i in range(look_back, len(df)):
             x_train.append(df['scaled_close'].iloc[i-look_back:i].values)
